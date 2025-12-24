@@ -33,11 +33,11 @@ jobs:
       - name: Create minimal scaffold files
         run: |
           set -e
-          mkdir -p src components mockData
+          mkdir -p src/components src/hooks mockData
 
           # README
           cat > README.md <<'EOF'
-Vibe — Valorant Match Analysis (minimal scaffold)
+Vibe - Valorant Match Analysis (minimal scaffold)
 
 This branch contains a minimal scaffold: a tiny React app stub and mock data.
 EOF
@@ -71,7 +71,7 @@ EOF
           cat > src/App.jsx <<'EOF'
 import React from "react";
 export default function App(){
-  return <div style={{padding:20,background:'#071026',minHeight:'100vh',color:'#fff'}}>Vibe — minimal scaffold</div>;
+  return <div style={{padding:20,background:'#071026',minHeight:'100vh',color:'#fff'}}>Vibe - minimal scaffold</div>;
 }
 EOF
 
