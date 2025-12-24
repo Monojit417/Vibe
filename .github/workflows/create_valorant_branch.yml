@@ -1,4 +1,4 @@
-name: Create Valorant_Analysis Branch (trimmed)
+name: Create Valorant_Analysis Branch (minimal)
 
 on:
   workflow_dispatch:
@@ -9,7 +9,6 @@ permissions:
 jobs:
   create-branch:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -23,7 +22,7 @@ jobs:
 
       - name: Prepare Valorant_Analysis branch
         run: |
-          # If the branch exists on origin, fetch it and create local branch from it, otherwise create new branch
+          # create or update local branch from origin if exists
           if git ls-remote --exit-code --heads origin Valorant_Analysis >/dev/null 2>&1; then
             git fetch origin Valorant_Analysis:refs/remotes/origin/Valorant_Analysis
             git checkout -B Valorant_Analysis origin/Valorant_Analysis
@@ -31,144 +30,60 @@ jobs:
             git checkout -B Valorant_Analysis
           fi
 
-      - name: Write minimal project files
+      - name: Create minimal scaffold files
         run: |
           set -e
+          mkdir -p src components mockData
 
-          mkdir -p src/components src/hooks mockData
-
+          # README
           cat > README.md <<'EOF'
-# Vibe — Valorant Match Analysis (trimmed)
+Vibe — Valorant Match Analysis (minimal scaffold)
 
-This branch contains a minimal scaffold: React + Tailwind stub, Firebase stub and a mock dataset.
-Run locally after adding your Firebase config and installing dependencies.
+This branch contains a minimal scaffold: a tiny React app stub and mock data.
 EOF
 
+          # package.json (minimal)
           cat > package.json <<'EOF'
 {
   "name": "vibe-valorant-analytics",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build"
+    "start": "react-scripts start"
   },
   "dependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "firebase": "^9.22.0",
-    "chart.js": "^4.4.0",
-    "react-chartjs-2": "^5.2.0",
-    "clsx": "^1.2.1"
-  },
-  "devDependencies": {
-    "tailwindcss": "^3.5.0",
-    "autoprefixer": "^10.4.14",
-    "postcss": "^8.4.24"
+    "react-dom": "^18.2.0"
   }
 }
 EOF
 
+          # minimal app files
+          mkdir -p src
           cat > src/index.jsx <<'EOF'
 import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
-import "./index.css";
-
 const root = createRoot(document.getElementById("root"));
 root.render(<App />);
 EOF
 
           cat > src/App.jsx <<'EOF'
 import React from "react";
-import { useMatches } from "./hooks/useMatches";
-import MatchList from "./components/MatchList";
-
 export default function App(){
-  const { matches } = useMatches();
-  return (
-    <div style={{background:'#071026',minHeight:'100vh',color:'#fff',padding:20}}>
-      <h1>Vibe — Valorant Match Analytics (trimmed)</h1>
-      <MatchList matches={matches} />
-    </div>
-  );
+  return <div style={{padding:20,background:'#071026',minHeight:'100vh',color:'#fff'}}>Vibe — minimal scaffold</div>;
 }
 EOF
 
-          cat > src/index.css <<'EOF'
-/* Tailwind stub for trimmed scaffold; replace with real Tailwind build in full project */
-body { margin:0; font-family: Inter, system-ui, Arial; }
-EOF
-
-          cat > src/firebase.js <<'EOF'
-// Minimal firebase stub — replace with your config or env vars
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "<API_KEY>",
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "<AUTH_DOMAIN>",
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "<PROJECT_ID>"
-};
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-export default app;
-EOF
-
-          cat > src/hooks/useMatches.js <<'EOF'
-import { useEffect, useState } from "react";
-import mock from "../../mockData/matches.json";
-
-// Trimmed hook: uses mock data for now
-export function useMatches() {
-  const [matches, setMatches] = useState([]);
-  useEffect(() => {
-    setMatches(mock);
-  }, []);
-  return { matches };
-}
-EOF
-
-          cat > src/components/MatchList.jsx <<'EOF'
-import React from "react";
-
-export default function MatchList({ matches = [] }) {
-  if (!matches.length) return <div>No matches (mock)</div>;
-  return (
-    <div>
-      {matches.map(m => (
-        <div key={m.id} style={{padding:8,borderBottom:'1px solid rgba(255,255,255,0.06)'}}>
-          <strong>{m.map}</strong> — {m.mode} — {m.score} — {m.result}
-        </div>
-      ))}
-    </div>
-  );
-}
-EOF
-
+          # simple mock data
           cat > mockData/matches.json <<'EOF'
 [
-  {
-    "id": "match_001",
-    "map": "Ascent",
-    "mode": "Competitive",
-    "score": "13-9",
-    "result": "win",
-    "date": "2025-12-23T20:30:00Z"
-  }
+  { "id": "match_001", "map": "Ascent", "mode": "Competitive", "score": "13-9", "result": "win" }
 ]
 EOF
 
-          cat > .gitignore <<'EOF'
-node_modules
-.build
-.env.local
-EOF
-
-      - name: Commit changes
+      - name: Commit and push
         run: |
           git add -A
-          git commit -m "Add trimmed Valorant_Analysis scaffold" || echo "No changes to commit"
-
-      - name: Push Valorant_Analysis branch
-        run: |
+          git commit -m "Add minimal Valorant_Analysis scaffold" || echo "No changes to commit"
           git push --set-upstream origin Valorant_Analysis --force
