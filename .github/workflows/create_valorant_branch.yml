@@ -1,4 +1,4 @@
-name: Create Valorant_Analysis Branch (minimal)
+name: Create Valorant_Analysis Branch (safe, no heredoc)
 
 on:
   workflow_dispatch:
@@ -22,7 +22,6 @@ jobs:
 
       - name: Prepare Valorant_Analysis branch
         run: |
-          # create or update local branch from origin if exists
           if git ls-remote --exit-code --heads origin Valorant_Analysis >/dev/null 2>&1; then
             git fetch origin Valorant_Analysis:refs/remotes/origin/Valorant_Analysis
             git checkout -B Valorant_Analysis origin/Valorant_Analysis
@@ -30,60 +29,42 @@ jobs:
             git checkout -B Valorant_Analysis
           fi
 
-      - name: Create minimal scaffold files
+      - name: Create minimal scaffold files (safe writes)
         run: |
           set -e
-          mkdir -p src/components src/hooks mockData
+          mkdir -p src mockData src/components src/hooks
 
-          # README
-          cat > README.md <<'EOF'
-Vibe - Valorant Match Analysis (minimal scaffold)
+          # README (single-line safe)
+          printf '%s\n' "Vibe - Valorant Match Analysis (minimal scaffold)" "" "This branch contains a minimal scaffold: a tiny React app stub and mock data." > README.md
 
-This branch contains a minimal scaffold: a tiny React app stub and mock data.
-EOF
+          # package.json
+          printf '%s\n' "{" \
+            "  \"name\": \"vibe-valorant-analytics\"," \
+            "  \"version\": \"0.1.0\"," \
+            "  \"private\": true," \
+            "  \"scripts\": {" \
+            "    \"start\": \"react-scripts start\"" \
+            "  }," \
+            "  \"dependencies\": {" \
+            "    \"react\": \"^18.2.0\"," \
+            "    \"react-dom\": \"^18.2.0\"" \
+            "  }" \
+            "}" > package.json
 
-          # package.json (minimal)
-          cat > package.json <<'EOF'
-{
-  "name": "vibe-valorant-analytics",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "start": "react-scripts start"
-  },
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
-  }
-}
-EOF
+          # src/index.jsx
+          printf '%s\n' 'import React from "react";' 'import { createRoot } from "react-dom/client";' 'import App from "./App";' 'const root = createRoot(document.getElementById("root"));' 'root.render(<App />);' > src/index.jsx
 
-          # minimal app files
-          mkdir -p src
-          cat > src/index.jsx <<'EOF'
-import React from "react";
-import { createRoot } from "react-dom/client";
-import App from "./App";
-const root = createRoot(document.getElementById("root"));
-root.render(<App />);
-EOF
-
-          cat > src/App.jsx <<'EOF'
-import React from "react";
-export default function App(){
-  return <div style={{padding:20,background:'#071026',minHeight:'100vh',color:'#fff'}}>Vibe - minimal scaffold</div>;
-}
-EOF
+          # src/App.jsx
+          printf '%s\n' 'import React from "react";' 'export default function App(){' '  return <div style={{padding:20,background:'#071026',minHeight:\"100vh\",color:\"#fff\"}}>Vibe - minimal scaffold</div>;' '}' > src/App.jsx
 
           # simple mock data
-          cat > mockData/matches.json <<'EOF'
-[
-  { "id": "match_001", "map": "Ascent", "mode": "Competitive", "score": "13-9", "result": "win" }
-]
-EOF
+          printf '%s\n' '[' '  { "id": "match_001", "map": "Ascent", "mode": "Competitive", "score": "13-9", "result": "win" }' ']' > mockData/matches.json
+
+          # .gitignore
+          printf '%s\n' "node_modules" ".build" ".env.local" > .gitignore
 
       - name: Commit and push
         run: |
           git add -A
-          git commit -m "Add minimal Valorant_Analysis scaffold" || echo "No changes to commit"
+          git commit -m "Add minimal Valorant_Analysis scaffold (safe-write)" || echo "No changes to commit"
           git push --set-upstream origin Valorant_Analysis --force
